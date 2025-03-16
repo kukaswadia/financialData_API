@@ -1,0 +1,11 @@
+fastapi==0.103.1
+uvicorn==0.23.2
+sqlalchemy==2.0.20
+pydantic==2.3.0
+python-dotenv==1.0.0
+requests==2.31.0
+pandas==2.1.0
+numpy==1.25.2
+sec-api==1.0.17  # Might need to find a suitable SEC API package
+python-jose==3.3.0  # For JWT auth if needed
+psycopg2-binary==2.9.7  # For PostgreSQL

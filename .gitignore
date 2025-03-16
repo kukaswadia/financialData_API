@@ -1,0 +1,84 @@
+# Environment and configuration
+.env
+*.env
+.env.*
+!.env.example
+venv/
+env/
+ENV/
+
+# API keys and secrets
+*.pem
+*.key
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+postgres-data/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Generated files
+instance/
+.webassets-cache
+.scrapy
+celerybeat-schedule
+celerybeat.pid
+data/
+downloads/
+exports/
+uploads/
+cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Unit test and coverage reports
+coverage/
+
+# Documentation
+docs/_build/
+site/
