@@ -1,58 +1,67 @@
-import pytest
-import os
-import sys
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
 
-# Add the src directory to the Python path
+import sys
+import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.models.models import Base, Company, FinancialStatement
-from src.extractors.sec_extractor import SECExtractor
-from src.extractors.earnings_extractor import EarningsReportExtractor
-from src.transformers.normalizer import FinancialDataNormalizer
-from src.validators.quality_validator import DataQualityValidator
-from src.analytics.metrics_calculator import FinancialMetricsCalculator
-from src.pipeline.etl_pipeline import ETLPipeline
+import pytest
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from src.models.models import Base, Company
+from src.api.main import app
+from src.api.database import get_db
+from fastapi.testclient import TestClient
+
+
+
+# Create test database
+TEST_DATABASE_URL = "sqlite:///./test.db"
+engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Create tables
+@pytest.fixture(scope="session", autouse=True)
+def setup_test_db():
+    Base.metadata.create_all(bind=engine)
+    yield
+    # Optional: Drop tables after all tests
+    # Base.metadata.drop_all(bind=engine)
 
 @pytest.fixture
-def db_engine():
-    """Create an in-memory SQLite database for testing."""
-    engine = create_engine(
-        "sqlite:///:memory:",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-    Base.metadata.create_all(engine)
-    return engine
+def db_session():
+    db = TestingSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 @pytest.fixture
-def db_session(db_engine):
-    """Create a new database session for a test."""
-    connection = db_engine.connect()
-    transaction = connection.begin()
-    Session = sessionmaker(autocommit=False, autoflush=False, bind=db_engine)
-    session = Session(bind=connection)
-    
-    yield session
-    
-    session.close()
-    transaction.rollback()
-    connection.close()
+def override_get_db():
+    db = TestingSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+@pytest.fixture
+def client(override_get_db):
+    # Override the dependency
+    app.dependency_overrides[get_db] = lambda: override_get_db
+    return TestClient(app)
 
 @pytest.fixture
 def sample_company(db_session):
-    """Create a sample company for testing."""
-    company = Company(
-        ticker="TEST",
-        name="Test Company",
-        sector="Technology",
-        industry="Software",
-        cik="0001234567"
-    )
-    db_session.add(company)
-    db_session.commit()
+    company = db_session.query(Company).filter(Company.ticker == "TEST").first()
+    if not company:
+        company = Company(
+            ticker="TEST",
+            name="Test Company",
+            sector="Technology",
+            industry="Software",
+            cik="0001234567"
+        )
+        db_session.add(company)
+        db_session.commit()
+        db_session.refresh(company)
     return company
 
 @pytest.fixture

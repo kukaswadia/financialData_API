@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Database setup
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://localhost/finance_db")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://hudakukaswadia@localhost/finance_db")
 
 # API keys
 SEC_API_KEY = os.getenv("SEC_API_KEY")
